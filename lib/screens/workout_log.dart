@@ -11,6 +11,10 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
   final _durationCtrl = TextEditingController();
   final _repsCtrl = TextEditingController();
 
+  void _addWorkout() {
+    // will implement next step
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,6 +37,9 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                 controller: _repsCtrl,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Reps')),
+            const SizedBox(height: 12),
+            ElevatedButton(
+                onPressed: _addWorkout, child: const Text('Add Workout')),
           ],
         ),
       ),

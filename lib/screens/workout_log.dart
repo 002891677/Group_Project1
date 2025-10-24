@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 
-class WorkoutLogScreen extends StatelessWidget {
+class WorkoutLogScreen extends StatefulWidget {
   const WorkoutLogScreen({super.key});
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Workout Log')),
-    body: const Center(child: Text('Workout list & form here')),
-  );
+  State<WorkoutLogScreen> createState() => _WorkoutLogScreenState();
+}
+
+class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Workout Log')),
+      body: const Center(child: Text('Workout list & form here')),
+    );
+  }
 }

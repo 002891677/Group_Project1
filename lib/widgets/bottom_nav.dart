@@ -32,22 +32,22 @@ class _BottomNavControllerState extends State<BottomNavController> {
         selectedItemColor: Colors.green,
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.fitness_center),
-            label: "Workout",
+            label: 'Workout',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.local_dining),
-            label: "Calories",
+            label: 'Calories',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: "Progress",
+            label: 'Progress',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: "Settings",
+            label: 'Settings',
           ),
         ],
       ),

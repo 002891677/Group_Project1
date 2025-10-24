@@ -3,6 +3,7 @@ import '../models/workout.dart';
 
 class WorkoutLogScreen extends StatefulWidget {
   const WorkoutLogScreen({super.key});
+
   @override
   State<WorkoutLogScreen> createState() => _WorkoutLogScreenState();
 }
@@ -35,6 +36,15 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
     _repsCtrl.clear();
   }
 
+  void _deleteWorkout(int index) {
+    setState(() {
+      _workouts.removeAt(index);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Workout deleted')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,24 +54,64 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ---------- INPUT FIELDS ----------
             TextField(
-                controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: 'Exercise Name')),
+              controller: _nameCtrl,
+              decoration: const InputDecoration(labelText: 'Exercise Name'),
+            ),
             const SizedBox(height: 8),
             TextField(
-                controller: _durationCtrl,
-                keyboardType: TextInputType.number,
-                decoration:
-                    const InputDecoration(labelText: 'Duration (minutes)')),
+              controller: _durationCtrl,
+              keyboardType: TextInputType.number,
+              decoration:
+                  const InputDecoration(labelText: 'Duration (minutes)'),
+            ),
             const SizedBox(height: 8),
             TextField(
-                controller: _repsCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Reps')),
+              controller: _repsCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Reps'),
+            ),
             const SizedBox(height: 12),
+
+            // ---------- ADD BUTTON ----------
             ElevatedButton(
-                onPressed: _addWorkout, child: const Text('Add Workout')),
+              onPressed: _addWorkout,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text('Add Workout', style: TextStyle(fontSize: 16)),
+            ),
+
             const SizedBox(height: 16),
+            const Divider(),
+
+            // ---------- PRESET ROUTINES ----------
+            const Text(
+              'Preset Routines',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            const ListTile(
+              title: Text('Beginner'),
+              subtitle: Text('Push-ups 3×10 • Squats 3×15 • Plank 3×30s'),
+            ),
+            const ListTile(
+              title: Text('Intermediate'),
+              subtitle: Text('Burpees 3×12 • Lunges 3×15 • Crunches 3×20'),
+            ),
+            const ListTile(
+              title: Text('Advanced'),
+              subtitle: Text(
+                  'Pull-ups 3×8 • Deadlifts 3×10 • Mountain Climbers 3×30s'),
+            ),
+
+            const Divider(),
+            const SizedBox(height: 8),
+
+            // ---------- WORKOUT LIST ----------
             const Text(
               'Your Workouts:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -75,11 +125,22 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                       itemBuilder: (context, i) {
                         final w = _workouts[i];
                         return Card(
+                          elevation: 3,
+                          margin: const EdgeInsets.symmetric(vertical: 6),
                           child: ListTile(
                             title: Text(
-                                '${w.name} – ${w.duration} min – ${w.reps} reps'),
+                              '${w.name} – ${w.duration} min – ${w.reps} reps',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                            ),
                             subtitle: Text(
-                                'Added: ${w.date.toLocal().toString().split(".").first}'),
+                              'Added: ${w.date.toLocal().toString().split(".").first}',
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _deleteWorkout(i),
+                            ),
                           ),
                         );
                       },

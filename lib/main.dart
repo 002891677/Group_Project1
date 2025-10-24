@@ -10,7 +10,11 @@ class FitnessTrackerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Fitness Tracker',
-      theme: ThemeData(primarySwatch: Colors.green),
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(centerTitle: true),
+      ),
       home: const BottomNavController(),
       debugShowCheckedModeBanner: false,
     );

@@ -18,8 +18,7 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
     final cals = int.tryParse(_calCtrl.text.trim());
     if (meal.isEmpty || cals == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter meal and calories')),
-      );
+          const SnackBar(content: Text('Please enter meal and calories')));
       return;
     }
 
@@ -37,6 +36,8 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
       _entries.removeAt(index);
     });
   }
+
+  int get totalCalories => _entries.fold(0, (sum, e) => sum + e.calories);
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +60,10 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
             ElevatedButton(
                 onPressed: _addEntry, child: const Text('Add Entry')),
             const SizedBox(height: 16),
-            const Text('Your Entries:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('Total Calories: $totalCalories',
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Divider(),
             Expanded(
               child: _entries.isEmpty
                   ? const Center(child: Text('No entries yet'))

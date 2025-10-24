@@ -11,6 +11,10 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
   final _mealCtrl = TextEditingController();
   final _calCtrl = TextEditingController();
 
+  void _addEntry() {
+    // Functionality will be added later
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +34,10 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
               decoration: const InputDecoration(labelText: 'Calories'),
             ),
             const SizedBox(height: 12),
-            const Text('Entries will appear here'),
+            ElevatedButton(
+              onPressed: _addEntry,
+              child: const Text('Add Entry'),
+            ),
           ],
         ),
       ),

@@ -17,12 +17,19 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
     final name = _nameCtrl.text.trim();
     final d = int.tryParse(_durationCtrl.text.trim());
     final r = int.tryParse(_repsCtrl.text.trim());
-    if (name.isEmpty || d == null || r == null) return;
+    if (name.isEmpty || d == null || r == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter all fields properly')),
+      );
+      return;
+    }
 
     setState(() {
-      _workouts
-          .add(Workout(name: name, duration: d, reps: r, date: DateTime.now()));
+      _workouts.add(
+        Workout(name: name, duration: d, reps: r, date: DateTime.now()),
+      );
     });
+
     _nameCtrl.clear();
     _durationCtrl.clear();
     _repsCtrl.clear();
@@ -35,6 +42,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
                 controller: _nameCtrl,
@@ -53,7 +61,12 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
             const SizedBox(height: 12),
             ElevatedButton(
                 onPressed: _addWorkout, child: const Text('Add Workout')),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            const Text(
+              'Your Workouts:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
             Expanded(
               child: _workouts.isEmpty
                   ? const Center(child: Text('No workouts added yet'))

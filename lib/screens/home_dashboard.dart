@@ -6,8 +6,8 @@ class HomeDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Fitness Dashboard")),
-      body: const Center(child: Text("Welcome to Fitness Tracker!")),
+      appBar: AppBar(title: const Text('Fitness Dashboard')),
+      body: const Center(child: Text('Welcome to Fitness Tracker!')),
     );
   }
 }

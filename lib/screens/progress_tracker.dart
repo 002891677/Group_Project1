@@ -4,7 +4,7 @@ class ProgressTrackerScreen extends StatelessWidget {
   const ProgressTrackerScreen({super.key});
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text("Progress Tracker")),
-    body: const Center(child: Text("Charts appear here")),
+    appBar: AppBar(title: const Text('Progress Tracker')),
+    body: const Center(child: Text('Charts appear here')),
   );
 }

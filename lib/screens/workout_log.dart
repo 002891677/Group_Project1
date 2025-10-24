@@ -138,7 +138,8 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                               style: const TextStyle(fontSize: 13),
                             ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
+                              icon: const Icon(Icons.delete_outline,
+                                  color: Colors.redAccent, size: 28),
                               onPressed: () => _deleteWorkout(i),
                             ),
                           ),

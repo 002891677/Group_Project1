@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/home_dashboard.dart';
 
 void main() => runApp(const FitnessTrackerApp());
 
@@ -10,7 +11,7 @@ class FitnessTrackerApp extends StatelessWidget {
     return MaterialApp(
       title: 'Fitness Tracker',
       theme: ThemeData(primarySwatch: Colors.green),
-      home: const Scaffold(body: Center(child: Text('Boot OK - placeholder'))),
+      home: const HomeDashboard(),
       debugShowCheckedModeBanner: false,
     );
   }

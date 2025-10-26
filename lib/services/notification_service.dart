@@ -8,39 +8,33 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> initNotification() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: android);
+    await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  Future<void> scheduleDailyNotification(
-      int hour, int minute, String title, String body) async {
-    // ✅ Request exact alarm permission if needed (Android 13+)
+    // Android 13+ runtime notification permission
     if (Platform.isAndroid) {
-      final androidInfo = await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.areNotificationsEnabled();
-
-      // Ensure user has granted notification permission first
-      if (androidInfo == false) {
+      if (await Permission.notification.isDenied) {
         await Permission.notification.request();
       }
-
-      // Handle exact alarm permission (Android 13+)
-      if (await Permission.scheduleExactAlarm.isDenied) {
-        await Permission.scheduleExactAlarm.request();
-      }
     }
+  }
+
+  /// Schedules a daily notification at [hour]:[minute] local time.
+  Future<void> scheduleDailyNotification(
+      int hour, int minute, String title, String body) async {
+    // Exact alarm permission hint (Android 13+)
+    if (Platform.isAndroid && await Permission.scheduleExactAlarm.isDenied) {
+      await Permission.scheduleExactAlarm.request();
+    }
+
+    final tz.TZDateTime next = _nextInstanceOfTime(hour, minute);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
       title,
       body,
-      tz.TZDateTime.now(tz.local).add(const Duration(seconds: 30)), // test
+      next,
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'daily_channel_id',
@@ -56,7 +50,15 @@ class NotificationService {
     );
   }
 
-  Future<void> cancelAll() async {
-    await flutterLocalNotificationsPlugin.cancelAll();
+  tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduled =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    if (scheduled.isBefore(now)) {
+      scheduled = scheduled.add(const Duration(days: 1));
+    }
+    return scheduled;
   }
+
+  Future<void> cancelAll() => flutterLocalNotificationsPlugin.cancelAll();
 }

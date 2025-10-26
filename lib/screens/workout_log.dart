@@ -1,149 +1,104 @@
 import 'package:flutter/material.dart';
 import '../db/database_helper.dart';
-
-class Workout {
-  final int? id;
-  final String name;
-  final int duration;
-  final int reps;
-  final DateTime date;
-
-  Workout({
-    this.id,
-    required this.name,
-    required this.duration,
-    required this.reps,
-    required this.date,
-  });
-}
+import '../models/workout.dart';
 
 class WorkoutLogScreen extends StatefulWidget {
   const WorkoutLogScreen({super.key});
-
   @override
   State<WorkoutLogScreen> createState() => _WorkoutLogScreenState();
 }
 
 class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
-  final _nameCtrl = TextEditingController();
-  final _durationCtrl = TextEditingController();
-  final _repsCtrl = TextEditingController();
-
-  final dbHelper = DatabaseHelper();
-  final List<Workout> _workouts = [];
+  final _name = TextEditingController();
+  final _sets = TextEditingController();
+  final _reps = TextEditingController();
+  List<Workout> _items = [];
 
   @override
   void initState() {
     super.initState();
-    _loadWorkouts();
+    _load();
   }
 
-  Future<void> _loadWorkouts() async {
-    final data = await dbHelper.getWorkouts();
-    setState(() {
-      _workouts.clear();
-      for (var item in data) {
-        _workouts.add(
-          Workout(
-            id: item['id'],
-            name: item['name'],
-            duration: item['duration'],
-            reps: item['reps'],
-            date: DateTime.parse(item['date']),
-          ),
-        );
-      }
-    });
+  Future<void> _load() async {
+    final rows = await DatabaseHelper.instance.getWorkouts();
+    if (!mounted) return;
+    setState(() => _items = rows);
   }
 
-  Future<void> _addWorkout() async {
-    final name = _nameCtrl.text.trim();
-    final duration = int.tryParse(_durationCtrl.text.trim());
-    final reps = int.tryParse(_repsCtrl.text.trim());
-    if (name.isEmpty || duration == null || reps == null) return;
-
-    final id = await dbHelper.insertWorkout({
-      'name': name,
-      'duration': duration,
-      'reps': reps,
-      'date': DateTime.now().toString(),
-    });
-
-    setState(() {
-      _workouts.insert(
-        0,
-        Workout(
-          id: id,
-          name: name,
-          duration: duration,
-          reps: reps,
-          date: DateTime.now(),
-        ),
-      );
-    });
-
-    _nameCtrl.clear();
-    _durationCtrl.clear();
-    _repsCtrl.clear();
+  Future<void> _add() async {
+    if (_name.text.isEmpty || _sets.text.isEmpty || _reps.text.isEmpty) return;
+    await DatabaseHelper.instance.insertWorkout(
+      Workout(
+        name: _name.text.trim(),
+        sets: int.tryParse(_sets.text.trim()) ?? 1,
+        reps: int.tryParse(_reps.text.trim()) ?? 1,
+        date: DateTime.now(),
+      ),
+    );
+    _name.clear();
+    _sets.clear();
+    _reps.clear();
+    _load();
   }
 
-  Future<void> _deleteWorkout(int id) async {
-    await dbHelper.deleteWorkout(id);
-    await _loadWorkouts();
+  Future<void> _delete(int id) async {
+    await DatabaseHelper.instance.deleteWorkout(id);
+    _load();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Workout Log')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _nameCtrl,
-              decoration: const InputDecoration(labelText: 'Exercise Name'),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
+                    child: TextField(
+                        controller: _name,
+                        decoration:
+                            const InputDecoration(labelText: 'Workout'))),
+                const SizedBox(width: 8),
+                SizedBox(
+                    width: 80,
+                    child: TextField(
+                        controller: _sets,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Sets'))),
+                const SizedBox(width: 8),
+                SizedBox(
+                    width: 80,
+                    child: TextField(
+                        controller: _reps,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Reps'))),
+                const SizedBox(width: 8),
+                ElevatedButton(onPressed: _add, child: const Text('Add')),
+              ],
             ),
-            TextField(
-              controller: _durationCtrl,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Duration (min)'),
+          ),
+          const Divider(height: 0),
+          Expanded(
+            child: ListView.separated(
+              itemCount: _items.length,
+              separatorBuilder: (_, __) => const Divider(height: 0),
+              itemBuilder: (context, i) {
+                final w = _items[i];
+                return ListTile(
+                  title: Text(w.name),
+                  subtitle: Text('Sets: ${w.sets}  Reps: ${w.reps}'),
+                  trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _delete(w.id!)),
+                );
+              },
             ),
-            TextField(
-              controller: _repsCtrl,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Reps'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _addWorkout,
-              child: const Text('Add Workout'),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: _workouts.isEmpty
-                  ? const Center(child: Text('No workouts yet'))
-                  : ListView.builder(
-                      itemCount: _workouts.length,
-                      itemBuilder: (context, i) {
-                        final w = _workouts[i];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 6),
-                          child: ListTile(
-                            title: Text(w.name),
-                            subtitle: Text(
-                                'Duration: ${w.duration} min | Reps: ${w.reps}'),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _deleteWorkout(w.id!),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

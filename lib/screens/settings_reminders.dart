@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/notification_service.dart';
 
 class SettingsRemindersScreen extends StatefulWidget {
   const SettingsRemindersScreen({super.key});
@@ -9,81 +10,105 @@ class SettingsRemindersScreen extends StatefulWidget {
 }
 
 class _SettingsRemindersScreenState extends State<SettingsRemindersScreen> {
-  bool reminderEnabled = false;
-  TimeOfDay? reminderTime;
-  bool calorieGoalEnabled = false;
-  int calorieGoal = 2000;
+  final NotificationService _notif = NotificationService();
+
+  bool _dailyEnabled = false;
+  TimeOfDay _dailyTime = const TimeOfDay(hour: 8, minute: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await _notif.initNotification(); // ✅ matches your service
+  }
+
+  String _fmt(TimeOfDay t) {
+    final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final m = t.minute.toString().padLeft(2, '0');
+    final ampm = t.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$h:$m $ampm';
+  }
 
   Future<void> _pickTime() async {
-    final time = await showTimePicker(
+    final picked = await showTimePicker(
       context: context,
-      initialTime: reminderTime ?? TimeOfDay.now(),
+      initialTime: _dailyTime,
     );
-    if (time != null) {
-      setState(() => reminderTime = time);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Reminder set to ${time.format(context)}')),
-      );
+    if (!mounted) return;
+
+    if (picked != null) {
+      setState(() => _dailyTime = picked);
+      if (_dailyEnabled) {
+        await _scheduleDaily(); // reschedule at new time
+      }
     }
+  }
+
+  Future<void> _scheduleDaily() async {
+    await _notif.scheduleDailyNotification(
+      _dailyTime.hour,
+      _dailyTime.minute,
+      'Daily Reminder',
+      'Time to log today’s workout and calories!',
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Daily reminder set for ${_fmt(_dailyTime)}')),
+    );
+  }
+
+  Future<void> _cancelAll() async {
+    await _notif.cancelAll();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('All reminders cancelled')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings & Reminders')),
+      appBar: AppBar(title: const Text('Reminders')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           SwitchListTile(
-            title: const Text('Enable Workout Reminder'),
-            value: reminderEnabled,
-            onChanged: (v) => setState(() => reminderEnabled = v),
+            title: const Text('Daily reminder'),
+            subtitle: Text(_dailyEnabled ? 'At ${_fmt(_dailyTime)}' : 'Off'),
+            value: _dailyEnabled,
+            onChanged: (v) async {
+              setState(() => _dailyEnabled = v);
+              if (v) {
+                await _scheduleDaily();
+              } else {
+                await _cancelAll();
+              }
+            },
           ),
-          if (reminderEnabled) ...[
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                reminderTime == null
-                    ? 'No reminder time set'
-                    : 'Reminder time: ${reminderTime!.format(context)}',
-              ),
-              trailing: ElevatedButton(
-                onPressed: _pickTime,
-                child: const Text('Pick Time'),
-              ),
+          const SizedBox(height: 12),
+          ListTile(
+            leading: const Icon(Icons.access_time),
+            title: const Text('Reminder time'),
+            subtitle: Text(_fmt(_dailyTime)),
+            trailing: TextButton(
+              onPressed: _pickTime,
+              child: const Text('Change'),
             ),
-            const SizedBox(height: 12),
-          ],
-          const Divider(),
-          SwitchListTile(
-            title: const Text('Enable Daily Calorie Goal'),
-            value: calorieGoalEnabled,
-            onChanged: (v) => setState(() => calorieGoalEnabled = v),
           ),
-          if (calorieGoalEnabled)
-            Row(
-              children: [
-                const Text('Goal:'),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Slider(
-                    value: calorieGoal.toDouble(),
-                    min: 1200,
-                    max: 3500,
-                    divisions: 23,
-                    label: '$calorieGoal',
-                    onChanged: (v) => setState(() => calorieGoal = v.round()),
-                  ),
-                ),
-                SizedBox(width: 72, child: Text('$calorieGoal cal')),
-              ],
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _dailyEnabled ? _scheduleDaily : null,
+            icon: const Icon(Icons.notifications_active),
+            label: const Text('Reschedule for selected time'),
+          ),
+          if (_dailyEnabled)
+            TextButton(
+              onPressed: _cancelAll,
+              child: const Text('Cancel reminders'),
             ),
-          const SizedBox(height: 8),
-          const Text(
-            'Note: This screen only stores state in-memory for now. '
-            'We can wire Local Notifications and persistent storage (SQLite) as a bonus later.',
-            style: TextStyle(fontSize: 12, color: Colors.black54),
-          ),
         ],
       ),
     );

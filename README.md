@@ -58,11 +58,13 @@ Results	Zero data loss, accurate summaries, smooth navigation
 📜 Individual Statement
 “I understand that I will be graded individually on group assignments and may not receive the same grade as all members.”
 Signatures:
-____________________ (Sai Kethan Bharadwaj Kanithi)
-____________________ (Murali Krishna Maddineni)
+Sai Kethan BHaradwaj Kanithi (Sai Kethan Bharadwaj Kanithi)
+Murali Krishna Maddineni (Murali Krishna Maddineni)
 🔗 GitHub Repository
 👉 https://github.com/002891677/Group_Project1.git
 🧩 Tools & References
+🔗 PPT
+👉 https://drive.google.com/drive/folders/12mVt6IqKfxDYBFwJPWFNGFUHWBsnZ1l6
 Flutter SDK
 Dart Programming Language
 SQLite (sqflite plugin)
